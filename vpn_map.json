@@ -1,0 +1,5 @@
+{
+  "Amerika": "/etc/openvpn/usa.ovpn",
+  "İngiltere": "/etc/openvpn/uk.ovpn",
+  "Almanya": "/etc/openvpn/de.ovpn"
+}

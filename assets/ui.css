@@ -43,14 +43,16 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--font);-web
   background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
   padding:var(--sp-6);box-shadow:0 10px 24px var(--shadow);
 }
-/* Kartlar arası 2cm boşluk */
-.container > .card{ margin-bottom: 2cm; }
+.container > .card{ margin-bottom: 10px; } /* Kartlar arası 2cm boşluk */
 
 /* Üst bar */
 .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-6)}
 .header .left{display:flex;align-items:center;gap:var(--sp-4)}
 .header h1{margin:0;font-size:1.25rem;line-height:1.2}
 .header .right{display:flex;align-items:center;gap:var(--sp-3)}
+
+/* Metin yardımcıları */
+.muted{ color: var(--muted); }
 
 /* Rozet */
 .badge{
@@ -81,27 +83,9 @@ input[type="text"],input[type="email"],input[type="password"],textarea{
 }
 textarea{min-height:220px;resize:vertical}
 label{color:var(--muted);font-size:.95rem;display:inline-flex;align-items:center;gap:var(--sp-3)}
-/* Checkbox/Radio modern görünüm */
 input[type="checkbox"],input[type="radio"]{
   inline-size:18px;block-size:18px;margin:0 var(--sp-3) 0 0;vertical-align:middle;
   accent-color:var(--secondary);
-}
-
-/* === VPN Ülkeleri: dikey liste, checkbox solda === */
-.vlist{display:flex;flex-direction:column;gap:8px;margin-top:8px}
-.vlist label{display:flex;align-items:center;gap:8px}
-
-/* (Eski düzeni kullanan grid yapıları için genel stiller korunuyor) */
-.grid-4 label{
-  padding:6px 8px;border-radius:10px;
-  transition:background var(--fast) var(--ease),border-color var(--fast) var(--ease);
-}
-.grid-4 label:hover{background:color-mix(in srgb,var(--card) 94%,var(--bg))}
-
-/* Focus görünürlüğü */
-:where(a,button,input,textarea,.theme-toggle):focus-visible{
-  outline:2px solid color-mix(in srgb,var(--secondary) 60%,white);
-  outline-offset:2px;border-radius:10px;
 }
 
 /* Gridler */
@@ -141,18 +125,10 @@ pre.log{
 .form-row > *{flex:0 1 auto}
 .form-row .small{flex:1 1 100%}
 
-/* VPN LOG: sabit pencere + scroll içerik */
-.card--vpnlog .log-window{
-  height:360px;overflow-y:auto;border:1px solid var(--border);
-  border-radius:var(--radius-sm);
-  background:color-mix(in srgb,var(--card) 92%,var(--bg));
-  padding:var(--sp-3);
-}
-.card--vpnlog pre.log{height:auto;min-height:0;margin:0}
-
 /* Login */
 .login-wrap{min-height:100%;display:grid;place-items:center;padding:var(--sp-8)}
-.login-card{width:min(420px,92vw)} .login-title{margin:0 0 var(--sp-4);font-size:1.2rem}
+.login-card{width:min(420px,92vw)}
+.login-title{margin:0 0 var(--sp-4);font-size:1.2rem}
 
 /* ------------------ Responsive ------------------ */
 @media (max-width:920px){
@@ -177,7 +153,91 @@ pre.log{
 .hidden{display:none !important}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .sticky{position:sticky;top:0;z-index:50;background:var(--bg)}
-a{color:var(--secondary);text-decoration:none} a:hover{text-decoration:underline}
-
-/* Küçük iyileştirmeler */
+a{color:var(--secondary);text-decoration:none}
+a:hover{text-decoration:underline}
 #mins{max-width:140px;text-align:center}
+
+/* ========== PANEL ÖZEL STİLLERİ (bot_panel.php’den taşındı) ========== */
+:root { --panel-vline: var(--border); }
+
+.panel-container{
+  display:grid;
+  grid-template-columns:1fr 2px 1fr;
+  background:var(--card);
+  border-radius:15px;
+  box-shadow:0 1px 8px var(--shadow);
+  padding:24px;
+  align-items:start;
+  border:1px solid var(--border);
+}
+.panel-section{
+  padding:0 24px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+}
+.vertical-line{
+  width:2px;
+  background:var(--panel-vline);
+  height:100%;
+  justify-self:center;
+  align-self:stretch;
+}
+.panel-section h3{ margin:0 0 6px 0; }
+.panel-section p{ margin:0 0 10px 0; color:var(--muted); }
+
+/* Form elemanları panel içinde */
+.panel-section input[type="text"],
+.panel-section input[type="number"],
+.panel-section textarea{
+  width:100%;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:10px;
+  background:color-mix(in srgb, var(--card) 92%, var(--bg));
+  color:var(--txt);
+  font-size:16px;
+  box-sizing:border-box;
+  resize:vertical;
+}
+
+/* Checkbox listesi */
+.checkbox-list{ display:flex; flex-direction:column; gap:16px; margin-top:16px; align-items:flex-start; }
+.checkbox-list label{ display:flex; align-items:center; gap:8px; font-weight:400; cursor:pointer; white-space:nowrap; }
+.checkbox-list input[type="checkbox"]{ margin-left:0; accent-color:var(--secondary); }
+
+/* Süre kutusu + kaydet */
+.süre-kutusu{ display:flex; align-items:center; gap:8px; margin-top:24px; width:100%; }
+.süre-kutusu label{ margin-bottom:0; white-space:nowrap; color:var(--muted); }
+.süre-kutusu input{ flex:1; max-width:180px; text-align:center; }
+.kaydet-btn{
+  background:var(--secondary); color:var(--secondary-ink);
+  border:none; border-radius:8px; padding:6px 22px; font-weight:bold; cursor:pointer; white-space:nowrap;
+}
+.kaydet-btn:hover{ filter:brightness(1.05) }
+
+.panel-info{ margin-top:8px; color:#888; font-size:14px; text-align:left; width:100%; margin-left:2cm; }
+
+/* VPN LOG penceresi */
+.card--vpnlog .log-window{
+  height:360px; overflow-y:auto; border:1px solid var(--border);
+  border-radius:12px; background:color-mix(in srgb,var(--card) 92%, var(--bg));
+  padding:12px;
+}
+.card--vpnlog h3{ margin-top:0; }
+
+/* Kart varyantları (inline style’ların yerine) */
+.card--flat{ padding:0; border:none; background:transparent; box-shadow:none; }
+.card--row{
+  display:flex; align-items:center; gap:10px;
+}
+.card--row h3{ margin:0; flex:1; }
+
+/* Responsive panel */
+@media (max-width:920px){
+  .panel-container{ grid-template-columns:1fr; gap:16px; }
+  .vertical-line{ display:none; }
+  .panel-info{ margin-left:0; }
+}
+
+

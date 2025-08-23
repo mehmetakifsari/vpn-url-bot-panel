@@ -46,9 +46,112 @@ if (!is_array($sel)) $sel = [];
 <title>VPN Bot Paneli — proje8</title>
 <link rel="stylesheet" href="/proje8/assets/ui.css">
 <style>
-  /* Ülkeleri alt alta; checkbox solda */
-  .vlist{display:flex;flex-direction:column;gap:8px;margin-top:8px}
-  .vlist label{display:flex;align-items:center;gap:8px}
+  /* === Senin verdiğin panel-container düzeni (yapıyı koruyarak eklendi) === */
+  :root {
+    --panel-vline: var(--border);
+  }
+  .panel-container {
+    display: grid;
+    grid-template-columns: 1fr 2px 1fr;
+    background: var(--card);
+    border-radius: 15px;
+    box-shadow: 0 1px 8px var(--shadow);
+    padding: 24px;
+    align-items: start;
+    border:1px solid var(--border);
+  }
+  .panel-section {
+    padding: 0 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+  .vertical-line {
+    width: 2px;
+    background: var(--panel-vline);
+    height: 100%;
+    justify-self: center;
+    align-self: stretch;
+  }
+  .panel-section h3{ margin:0 0 6px 0; }
+  .panel-section p{ margin:0 0 10px 0; color:var(--muted); }
+
+  /* Form elemanları (ui.css ile uyumlu) */
+  .panel-section input[type="text"],
+  .panel-section input[type="number"],
+  .panel-section textarea{
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px;
+    background: color-mix(in srgb, var(--card) 92%, var(--bg));
+    color: var(--txt);
+    font-size: 16px;
+    box-sizing: border-box;
+    resize: vertical;
+  }
+
+  .checkbox-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+    align-items: flex-start;
+  }
+  .checkbox-list label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 400;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .checkbox-list input[type="checkbox"]{ margin-left:0; accent-color:var(--secondary); }
+
+  /* Süre kutusu ve kaydet */
+  .süre-kutusu {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 24px;
+    width: 100%;
+  }
+  .süre-kutusu label { margin-bottom:0; white-space:nowrap; color:var(--muted); }
+  .süre-kutusu input { flex:1; max-width:180px; text-align:center; }
+
+  .kaydet-btn {
+    background: var(--secondary);
+    color: var(--secondary-ink);
+    border: none;
+    border-radius: 8px;
+    padding: 6px 22px;
+    font-weight: bold;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .kaydet-btn:hover{ filter:brightness(1.05) }
+
+  .panel-info {
+    margin-top: 8px;
+    color: #888;
+    font-size: 14px;
+    text-align: left;
+    width: 100%;
+    margin-left: 2cm;
+  }
+
+  /* Log alanı isteklerine uygun: pencere sabit + içerik scroll */
+  .card--vpnlog .log-window{
+    height:360px;overflow-y:auto;border:1px solid var(--border);
+    border-radius:12px;background:color-mix(in srgb,var(--card) 92%, var(--bg));
+    padding:12px;
+  }
+
+  @media (max-width:920px){
+    .panel-container{ grid-template-columns:1fr; gap:16px }
+    .vertical-line{ display:none }
+    .panel-info{ margin-left:0 }
+  }
 </style>
 </head>
 <body>
@@ -59,6 +162,7 @@ if (!is_array($sel)) $sel = [];
     <div class="left">
       <h1>VPN Botu — proje8</h1>
       <span class="badge">Kullanıcı: <?=htmlspecialchars($_SESSION['name'] ?? $_SESSION['role'] ?? 'admin')?></span>
+      <?php if(isset($_GET['saved'])): ?><span class="badge">Ayarlar kaydedildi</span><?php endif; ?>
     </div>
     <div class="right">
       <!-- Buton METNİ: hedef mod; koyudayken 'Gündüz Mod', gündüzdeyken 'Karanlık Mod' -->
@@ -70,36 +174,43 @@ if (!is_array($sel)) $sel = [];
     </div>
   </div>
 
-  <!-- AYARLAR KARTI -->
-  <form method="post" class="card">
+  <!-- AYARLAR KARTI (senin verdiğin panel-container yapısı ile) -->
+  <form method="post" class="card" style="padding:0;border:none;background:transparent;box-shadow:none;">
     <input type="hidden" name="act" value="save">
-    <div class="grid-2">
-      <div>
+
+    <div class="panel-container">
+      <div class="panel-section url-listesi">
         <h3>URL Listesi</h3>
-        <label>Her satıra bir URL</label>
+        <p>Her satıra bir URL</p>
         <textarea name="urls" rows="12" placeholder="https://..."><?=htmlspecialchars($urls_txt)?></textarea>
       </div>
-      <div>
-        <h3>VPN Ülkeleri</h3>
 
-        <div class="vlist">
+      <div class="vertical-line"></div>
+
+      <div class="panel-section vpn-ulkeleri">
+        <h3>VPN Ülkeleri</h3>
+        <div class="checkbox-list">
           <label><input type="checkbox" id="selAll"> Tümünü Seç</label>
           <?php foreach ($map as $country=>$ovpn): ?>
             <?php $checked = in_array($country,$sel,true) ? 'checked' : ''; ?>
             <label>
+              <!-- sınıf adlarını senin JS’inle uyumlu tuttum: .cbox -->
               <input type="checkbox" class="cbox" name="countries[]" value="<?=htmlspecialchars($country)?>" <?=$checked?>>
               <?=htmlspecialchars($country)?>
             </label>
           <?php endforeach; ?>
+          <?php if(empty($map)): ?>
+            <em style="color:var(--muted)">vpn_map.json boş görünüyor.</em>
+          <?php endif; ?>
         </div>
 
-        <div class="form-row" style="margin-top:12px">
-          <label for="mins">Süre (dk):</label>
-          <input id="mins" type="number" min="1" step="1" name="minutes"
-                 value="<?=htmlspecialchars($mins_txt ?: '3')?>" style="max-width:140px;text-align:center">
-          <button type="submit" class="btn secondary">Kaydet</button>
-          <span class="small">Seçimleri kaydedin, sonra Başlat’a basın.</span>
+        <div class="süre-kutusu">
+          <label for="sure">Süre (dk):</label>
+          <input id="sure" type="number" name="minutes" value="<?=htmlspecialchars($mins_txt ?: '3')?>" min="1">
+          <button class="kaydet-btn" type="submit">Kaydet</button>
         </div>
+
+        <div class="panel-info">Seçimleri kaydedin, sonra Başlat’a basın.</div>
       </div>
     </div>
   </form>
@@ -112,7 +223,7 @@ if (!is_array($sel)) $sel = [];
     <span id="stat" class="badge">Durum: bilinmiyor</span>
   </div>
 
-  <!-- VPN LOG -->
+  <!-- VPN LOG (sabit pencere + içeriği scroll) -->
   <div class="card card--vpnlog">
     <h3 style="margin-top:0">VPN Log</h3>
     <div class="log-window">
@@ -213,6 +324,10 @@ chkAll?.addEventListener('change', e=>{
 });
 boxes.forEach(cb => cb.addEventListener('change', syncMaster));
 syncMaster();
+
+// (İstersen) Başlat/Durdur butonlarına AJAX bağlayacağımız alan
+// document.getElementById('btnStart').onclick = ()=>{ /* fetch('run_bot.php?action=start') ... */ };
+// document.getElementById('btnStop').onclick  = ()=>{ /* fetch('run_bot.php?action=stop') ... */ };
 </script>
 </body>
 </html>
